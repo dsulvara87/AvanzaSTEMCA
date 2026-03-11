@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Energía Sostenible </title>
+    <style>
+        :root {
+            --bg: #050a0f;
+            --panel: #0d1117;
+            --accent: #00ff9d;
+            --success: #238636;
+            --warning: #d29922;
+            --danger: #da3633;
+            --text: #c9d1d9;
+            --border: #30363d;
+            --code-bg: #000000;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Navegación WISE */
+        .wise-nav {
+            display: flex;
+            background: #161b22;
+            padding: 10px 20px 0;
+            gap: 5px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .step-btn {
+            padding: 12px 20px;
+            border: 1px solid var(--border);
+            border-bottom: none;
+            background: #0d1117;
+            color: #8b949e;
+            cursor: not-allowed;
+            border-radius: 6px 6px 0 0;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+            .step-btn.unlocked {
+                cursor: pointer;
+                color: var(--text);
+            }
+
+            .step-btn.active {
+                background: var(--bg);
+                color: var(--accent);
+                border-top: 2px solid var(--accent);
+                font-weight: bold;
+            }
+
+        .workspace {
+            display: none;
+            flex: 1;
+            overflow: hidden;
+            grid-template-columns: 400px auto 420px;
+        }
+
+            .workspace.active {
+                display: grid;
+            }
+
+        aside {
+            background: var(--panel);
+            padding: 20px;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #panelSTEM {
+            border-right: none;
+            border-left: 1px solid var(--border);
+        }
+
+        /* Estética Pedagógica */
+        .edu-card {
+            background: rgba(0, 255, 157, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .lab-task {
+            background: #161b22;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+            .lab-task h4 {
+                color: var(--warning);
+                margin-top: 0;
+                font-size: 0.9rem;
+                text-transform: uppercase;
+            }
+
+        .ide-editor {
+            width: 100%;
+            background: var(--code-bg);
+            color: #39ff14;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            resize: none;
+            margin-top: 10px;
+        }
+
+        .btn-eng {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            background: var(--success);
+            color: white;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        /* Checklist de Ingeniería */
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+            font-size: 0.8rem;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--accent);
+        }
+        /* ============================= */
+        /* MENTOR METACOGNITIVO ENERGÍA */
+        /* ============================= */
+
+        .mentor-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 360px;
+            background: #161b22;
+            color: #c9d1d9;
+            border-left: 4px solid #58a6ff;
+            border-radius: 12px;
+            display: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.6);
+            z-index: 9999;
+            overflow: hidden;
+            font-size: 14px;
+        }
+
+        .mentor-header {
+            background: #0d1117;
+            padding: 10px 12px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #58a6ff;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .mentor-content {
+            padding: 12px;
+            line-height: 1.4;
+        }
+
+        .mentor-close {
+            background: transparent;
+            border: none;
+            color: #c9d1d9;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="wise-nav">
+        <button class="step-btn active unlocked" id="b1" onclick="nav(1)">01. Teoría e Indagación</button>
+        <button class="step-btn" id="b2" onclick="nav(2)">02. El Reto Bogotá</button>
+        <button class="step-btn" id="b3" onclick="nav(3)">03. Diseño de Prototipo</button>
+        <button class="step-btn" id="b4" onclick="nav(4)">04. Sistematización Final</button>
+    </nav>
+
+    <section id="s1" class="workspace active">
+        <aside>
+            <h2>📚 Teoría Energética</h2>
+            <div class="edu-card">La energía no se crea, se transforma. En Bogotá, nuestras principales fuentes son hídricas, pero el cambio climático exige alternativas.</div>
+            <div class="lab-task">
+                <h4>Actividad: Clasificación</h4>
+                <p>Identifica en el video 2 fuentes de energía renovable y explica cómo se podrían captar en el Páramo.</p>
+            </div>
+            <textarea id="plan-input" class="ide-editor" rows="4"
+                      placeholder="Planificación:
+1. ¿Qué fuente analizarás?
+2. ¿Qué variable climática considerarás?
+3. ¿Qué criterio usarás para decidir viabilidad?"
+                      oninput="activarPlanificacion()"></textarea>
+
+            <textarea id="diag-input" class="ide-editor" style="height: 180px;" placeholder="Registra tus hallazgos teóricos (Mínimo 80 caracteres)..." oninput="validateL1()"></textarea>
+            <button class="btn-eng" id="btn-lock1" disabled onclick="unlock(2)">Ir al Reto Bogotá →</button>
+        </aside>
+        <main style="display: flex; justify-content: center; align-items: center; padding: 20px; min-height: 400px;">
+            <div style="width: 90%; max-width: 900px; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 15px; border: 2px solid var(--border);">
+
+                <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+                        src="https://www.youtube.com/embed/ZiWV7Nl9t_0?rel=0"
+                        title="Energías Renovables - El Camino hacia un Futuro Sostenible"
+                        frameborder="0"
+                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen>
+                </iframe>
+
+            </div>
+        </main>
+        <aside id="panelSTEM">
+            <h2>🌍 Importancia Territorial</h2>
+            <div class="edu-card">¿Sabías que Bogotá tiene uno de los páramos más grandes del mundo (Sumapaz)? La energía aquí enfrenta retos de presión y humedad.</div>
+            <textarea class="ide-editor" rows="15" placeholder="¿Por qué la energía tradicional es difícil de llevar a zonas rurales de Bogotá?"></textarea>
+        </aside>
+    </section>
+
+    <section id="s2" class="workspace">
+        <aside>
+            <h2>🏙️ Problemática Real</h2>
+            <div class="edu-card">Usme y Sumapaz sufren cortes de energía por tormentas. <b>Tu misión:</b> Proponer una solución de energía "Off-Grid" (fuera de la red).</div>
+            <div class="lab-task">
+                <h4>Selección de Tecnología</h4>
+                <select id="tech-choice" class="ide-editor" style="color:white">
+                    <option value="solar">Energía Solar (Fotovoltaica)</option>
+                    <option value="eolica">Energía Eólica (Micro-turbinas)</option>
+                    <option value="biomasa">Biomasa (Residuos Orgánicos)</option>
+                </select>
+            </div>
+            <button class="btn-eng" onclick="unlock(3)">Diseñar Prototipo →</button>
+        </aside>
+        <main style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 20px; background: #00151a;">
+            <div style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 12px; border: 1px solid var(--accent); width: 80%;">
+                <h3 style="color: var(--accent); text-align: center;">Escenario: Escuela Rural Usme</h3>
+                <p style="font-size: 0.9rem;">Consumo estimado: 5 Computadoras (250W) + 6 Bombillos (60W).<br><br><b>Consumo Total Requerido: 310W</b></p>
+                <div class="edu-card" style="border-left-color: var(--warning);">Basado en tu investigación de Bogotá, ¿cuántas horas de sol o viento efectivo crees que tiene esta zona al día?</div>
+            </div>
+        </main>
+        <aside id="panelSTEM">
+            <h2>🧩 Investigación de Campo</h2>
+            <textarea class="ide-editor" rows="22" placeholder="Justifica por qué tu tecnología elegida es la mejor para el clima de Bogotá..."></textarea>
+        </aside>
+    </section>
+
+    <section id="s3" class="workspace">
+        <aside>
+            <h2>🏗️ Plan de Ingeniería</h2>
+            <div class="edu-card"><b>Actividad Práctica:</b> Describe la lista de materiales y el esquema de conexión de tu solución.</div>
+            <div class="lab-task">
+                <h4>Checklist de Componentes</h4>
+                <div class="check-item"><input type="checkbox"> Generador (Panel/Turbina)</div>
+                <div class="check-item"><input type="checkbox"> Regulador de Carga</div>
+                <div class="check-item"><input type="checkbox"> Batería de Ciclo Profundo</div>
+                <div class="check-item"><input type="checkbox"> Inversor de Corriente</div>
+            </div>
+            <button class="btn-eng" onclick="unlock(4)">Finalizar Diseño →</button>
+        </aside>
+        <main style="display:flex; flex-direction:column; padding: 40px; background: #050a0f; overflow-y: auto;">
+            <h3 style="color: var(--accent);">Guía de Montaje Paso a Paso</h3>
+            <div class="edu-card" style="background: #161b22;">
+                <b>Paso 1: Orientación.</b> ¿Hacia dónde orientarías los paneles o turbinas en Bogotá para captar el máximo flujo?<br><br>
+                <b>Paso 2: Conexión Segura.</b> Describe cómo evitarías un cortocircuito por la humedad del páramo.<br><br>
+                <b>Paso 3: Almacenamiento.</b> ¿Dónde ubicarías las baterías para protegerlas del frío extremo (que baja su rendimiento)?
+            </div>
+            <textarea id="step-by-step" class="ide-editor" style="height: 300px;" placeholder="Redacta aquí tu manual de instalación física..."></textarea>
+        </main>
+        <aside id="panelSTEM">
+            <h2>📐 Cálculos de Diseño</h2>
+            <div class="edu-card">Investiga: Si la batería es de 100Ah y 12V, ¿cuánta energía total (Wh) puede almacenar?</div>
+            <textarea class="ide-editor" rows="20" placeholder="Registra tus cálculos matemáticos aquí..."></textarea>
+        </aside>
+    </section>
+
+    <section id="s4" class="workspace">
+        <aside>
+            <h2>📊 Evidencia Final</h2>
+            <textarea id="calc-medidas" class="ide-editor" rows="22" placeholder="Resumen de especificaciones técnicas..."></textarea>
+        </aside>
+        <main style="background:#010409; padding:20px; overflow-y:auto;">
+            <div style="background:#fff; color:#000; padding:40px; border-radius:8px; font-family:serif;">
+                <h1 style="text-align:center; border-bottom: 2px solid #000; font-size: 1.4rem;">INFORME DE INGENIERÍA: ENERGÍA BOGOTÁ</h1>
+                <p><b>Propuesta Pedagógica:</b> Solución Energética Sustentable.</p>
+                <textarea id="full-report" class="ide-editor" style="background:#f9f9f9; color:#000; height:350px; border: 1px solid #ddd;" placeholder="Redacta tu propuesta final de investigación..."></textarea>
+            </div>
+            <button class="btn-eng" style="margin-top:20px;" onclick="exportCSV()">💾 Descargar Evidencia (.CSV)</button>
+        </main>
+        <aside id="panelSTEM">
+            <h2>🎓 Sistematización Doctoral</h2>
+            <textarea id="concl-final" class="ide-editor" rows="22" placeholder="Reflexión sobre el impacto social de tu proyecto..."></textarea>
+        </aside>
+    </section>
+
+    <script>let unlocked = [1];
+
+        function nav(n) {
+            if (!unlocked.includes(n)) return;
+            document.querySelectorAll('.workspace, .step-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('s' + n).classList.add('active');
+            document.getElementById('b' + n).classList.add('active');
+        }
+
+        function unlock(n) {
+            if (!unlocked.includes(n)) { unlocked.push(n); document.getElementById('b' + n).classList.add('unlocked'); }
+            nav(n);
+        }
+        function irAlNivel3() {
+            // Simulamos una validación: ¿escribió algo en la tabla o bitácora?
+            const notas = document.getElementById('step-by-step').value; // Suponiendo que usa este campo
+            if (notas.length < 20) {
+                metaEnergia("El estudiante intenta diseñar sin haber analizado los datos de radiación y viento del nivel anterior.",3);
+            } else {
+                unlock(3);
+            }
+        }
+
+        // Agrega este 'onblur' o un botón de "Revisar Diseño"
+        function validarPropuestaTecnica() {
+            const propuesta = document.getElementById('step-by-step').value.toLowerCase();
+            if (propuesta.length > 10 && !propuesta.includes("panel") && !propuesta.includes("turbina")) {
+                metaEnergia("La propuesta técnica no menciona ninguna fuente de generación de energía. ¿Cómo funcionará el sistema?",3);
+            }
+        }
+
+        function verificarNivel2() {
+            const analisis = document.getElementById('data-analysis').value;
+            if (analisis.length < 30) {
+                // Esto activa al mentor en el Nivel 2
+                metaAyuda("El estudiante no ha realizado un análisis suficiente de los datos de radiación solar.");
+            } else {
+                unlock(3);
+            }
+        }
+
+        function validateL1() {
+            const texto = document.getElementById('diag-input').value;
+
+            // Si escribe muy poco, el mentor da una pista
+            if (texto.length > 0 && texto.length < 40) {
+                metaEnergia("El estudiante está dando un diagnóstico muy superficial sobre la necesidad de energía en Usme.");
+            }
+
+            if (texto.length > 80) {
+                const b = document.getElementById('btn-lock1');
+                b.disabled = false;
+                b.style.opacity = "1";
+            }
+        }
+        function exportCSV() {
+            const informe = document.getElementById('full-report').value;
+            const conclusiones = document.getElementById('concl-final').value;
+
+            if (informe.length < 50 || conclusiones.length < 30) {
+                metaEnergia("El informe final carece de profundidad. Para completar la misión, reflexiona sobre los retos encontrados.",4);
+                return; // Detiene la descarga del CSV
+            }
+
+            // ... (aquí sigue tu código original de generación de CSV)
+            let csv = "FASE,CONTENIDO\n";
+            // ... resto del código
+        }
+
+        function activarPlanificacion() {
+
+            const texto = document.getElementById("plan-input").value;
+
+            if (texto.length > 30 && texto.length < 120) {
+                metaEnergia(
+                    "La planificación inicial es general y puede carecer de criterios técnicos claros.",
+                    1
+                );
+           m }
+        }
+        // ============================
+        /* ======================================
+           ANDAMIAJE METACOGNITIVO GLOBAL
+           ====================================== */
+
+        function mostrarMentor(texto) {
+            document.getElementById("mentorText").innerHTML = texto;
+            document.getElementById("mentorBox").style.display = "block";
+        }
+
+        function cerrarMentor() {
+            document.getElementById("mentorBox").style.display = "none";
+        }
+
+        async function metaEnergia(error, nivel) {
+
+            mostrarMentor("Analizando tu proceso energético... ⚡");
+
+            const API_KEY = "AIzaSyBatnEUgvVX0UleWvoAxIocfIbLl73qyTk";
+            const modelo = "gemini-2.5-flash";
+
+            const contexto = {
+                1: "Planificación conceptual",
+                2: "Monitoreo de estrategia",
+                3: "Evaluación técnica",
+                4: "Reflexión final"
+            };
+
+            const prompt = `
+Eres un mentor metacognitivo STEM.
+Fase: ${contexto[nivel]}
+Situación detectada: ${error}
+
+No des la respuesta.
+Haz 1 pregunta que obligue a revisar la estrategia.
+Haz 1 sugerencia breve.
+Clasifica el nivel como superficial, medio o profundo.
+`;
+
+            try {
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }]
+                        })
+                    }
+                );
+
+                // ... (resto del código del fetch)
+                const data = await response.json();
+                if (data.candidates) {
+                    mostrarMentor(data.candidates[0].content.parts[0].text);
+                } else {
+                    mostrarMentor("El mentor está analizando los datos...");
+                }
+
+            } catch (err) {
+                mostrarMentor("Pista: Revisa los valores de eficiencia en tu tabla.");
+            }
+        } // <--- ESTA LLAVE CIERRA LA FUNCIÓN metaAyuda
+
+        // ESTA FUNCIÓN DEBE ESTAR SOLA Y AFUERA PARA QUE EL BOTÓN FUNCIONE
+        function cerrarMentor() {
+            const caja = document.getElementById("mentorBox");
+            if (caja) {
+                caja.style.display = "none";
+            }
+        }</script>
+
+    <div id="mentorBox" style="
+        position:fixed; bottom:20px; right:20px; width:330px;
+        background:#161b22; border-left:4px solid #00ff9d;
+        border-radius:10px; padding:15px; display:none;
+        z-index:9999; box-shadow:0 0 15px rgba(0,0,0,0.6); font-size:13px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3 style="margin:0; color:#00ff9d;">🧠 Mentor Metacognitivo</h3>
+            <button onclick="cerrarMentor()" style="background:none; border:none; color:#8b949e; cursor:pointer; font-size:18px;">✕</button>
+        </div>
+        <div id="mentorText" style="color:#c9d1d9; line-height:1.4;"></div>
+    </div>
+
+
+</body>
+</html>

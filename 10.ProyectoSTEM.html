@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>🏡 Proyecto Escolar STEM: Diseño de Casa Inteligente</title>
+    <style>
+        :root {
+            --accent: #ffb703;
+            --muted: #9fbcd9;
+            --good: #00ffb3;
+            --danger: #ff4500;
+            --panel-bg: rgba(0,0,0,0.65);
+            --project-color: #00e0ff;
+            --design-bg: #092c42;
+            --border-light: rgba(255,255,255,0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(180deg, #04060a, #081822);
+            color: #e6f7ff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            padding: 12px;
+            text-align: center;
+            background: linear-gradient(180deg, #061526, #072733);
+            border-bottom: 2px solid rgba(255,183,3,0.06);
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--project-color);
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr 1fr;
+            gap: 16px;
+            height: calc(100vh - 60px);
+            padding: 16px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+        }
+
+            .panel h2 {
+                color: var(--project-color);
+                border-bottom: 1px solid rgba(0,224,255,0.2);
+                padding-bottom: 6px;
+                margin-top: 0;
+            }
+
+        button {
+            background: var(--accent);
+            color: #001;
+            border: 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background 0.2s;
+        }
+
+            button:hover {
+                background: #ffc94e;
+            }
+
+            button.secondary {
+                background: transparent;
+                color: #e6f7ff;
+                border: 1px solid rgba(255,255,255,0.15);
+            }
+
+        #design-workflow-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            flex-grow: 1;
+        }
+
+        .design-lane {
+            background: var(--design-bg);
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 200px;
+            border-top: 3px solid var(--project-color);
+        }
+
+            .design-lane h3 {
+                color: var(--project-color);
+                text-align: center;
+                margin: 0 0 12px;
+            }
+
+        .idea-card {
+            background: rgba(255,255,255,0.08);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: grab;
+            border-left: 4px solid var(--project-color);
+        }
+
+            .idea-card.finalizado {
+                border-left-color: var(--good);
+                text-decoration: line-through;
+                opacity: 0.85;
+            }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+            font-size: 0.95rem;
+        }
+
+        .metric-value {
+            font-weight: bold;
+            color: var(--project-color);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.5);
+            color: #e6f7ff;
+            resize: vertical;
+        }
+
+        /* Mentor Chat */
+        #mentor-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 28px;
+            line-height: 60px;
+            text-align: center;
+            background: var(--accent);
+            color: #001;
+            border: 3px solid var(--project-color);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        #mentor-chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            z-index: 9999;
+            width: 340px;
+            height: 440px;
+            background: #061526;
+            border: 2px solid var(--project-color);
+            border-radius: 12px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+        }
+
+        #chat-header {
+            background: var(--project-color);
+            color: #001;
+            padding: 10px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        #chat-messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            background: #081822;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            max-width: 88%;
+            padding: 9px 12px;
+            border-radius: 10px;
+        }
+
+        .user-message {
+            background: #072733;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .gemini-message {
+            background: #1f3355;
+            margin-right: auto;
+        }
+
+        #chat-input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #chat-input {
+            flex-grow: 1;
+            margin-right: 8px;
+            padding: 9px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #0e2942;
+            color: white;
+        }
+
+        #chat-send-btn-ui {
+            background: var(--project-color);
+            color: #001;
+            font-weight: 700;
+            border: none;
+            padding: 9px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            main {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .column {
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏡 Proyecto Escolar STEM: Casa Inteligente Sostenible</h1>
+        <div style="font-size:0.9rem; color:#9fbcd9;">Investigación → Diseño → Validación</div>
+    </header>
+
+    <main>
+
+        <!-- Columna 1: Investigación / Planificación -->
+        <div class="column">
+            <div class="panel">
+                <h2>1. Investigación</h2>
+                <div id="project-ideas">
+                    <h3>Lista de Ideas / Requisitos</h3>
+                    <div id="ideas-list"></div>
+
+                    <h3 style="margin-top:16px;">Añadir nueva idea</h3>
+                    <textarea id="new-idea-input" placeholder="Ej: Luces automáticas con sensor de movimiento..."></textarea>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button id="btnAddIdea">➕ Añadir Idea</button>
+                        <button id="btnStartCycle" class="secondary">▶️ Iniciar Ciclo</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Navegación rápida</h2>
+                <div style="display:grid; gap:8px; margin-top:12px;">
+                    <button onclick="document.querySelector('#design-log').scrollIntoView({behavior:'smooth'})">Ir a Esquematización</button>
+                    <button onclick="document.querySelector('#prototyping-metrics').scrollIntoView({behavior:'smooth'})">Ir a Validación</button>
+                    <button onclick="document.querySelector('#analysis').scrollIntoView({behavior:'smooth'})">Ir a Análisis Final</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna 2: Esquematización / Monitoreo (centro - más espacio) -->
+        <div class="column">
+            <div class="panel" style="flex-grow:1; display:flex; flex-direction:column;">
+                <h2>2. Esquematización y Diseño</h2>
+                <p style="font-size:0.9rem; color:#9fbcd9; margin:0 0 12px 0;">
+                    Arrastra las ideas según avances: Seleccionadas → En Proceso → Finalizado
+                </p>
+                <div id="design-workflow-container">
+                    <div id="todo-lane" class="design-lane"><h3>Seleccionadas</h3></div>
+                    <div id="in-progress-lane" class="design-lane"><h3>En Proceso</h3></div>
+                    <div id="done-lane" class="design-lane"><h3>Finalizado</h3></div>
+                </div>
+            </div>
+
+            <div id="design-log" class="panel">
+                <h2>Diseño lógico y documentación</h2>
+                <p style="font-size:0.9rem; color:#9fbcd9;">Describe componentes, conexiones y lógica de control.</p>
+                <textarea id="design-output-area" placeholder="Ejemplo: Sensor PIR → Arduino Nano → Relé → Luces LED\nJustificación: bajo consumo en reposo..."></textarea>
+                <button id="btnSaveDesign" style="margin-top:12px; width:100%;">💾 Guardar Esquema</button>
+            </div>
+        </div>
+
+        <!-- Columna 3: Prototipado y Análisis -->
+        <div class="column">
+            <div id="prototyping-metrics" class="panel">
+                <h2>3. Prototipado y Validación</h2>
+                <p style="font-size:0.9rem; color:#9fbcd9; margin-bottom:12px;">
+                    Objetivo: ≥ 30% de ahorro energético
+                </p>
+                <div class="metric-row"><span>Consumo base:</span><span id="metric-base-consumption" class="metric-value">550 kWh</span></div>
+                <div class="metric-row"><span>Ahorro logrado:</span><span id="metric-saving" class="metric-value">0%</span></div>
+                <div class="metric-row"><span>Consumo final:</span><span id="metric-final-consumption" class="metric-value">550 kWh</span></div>
+                <div class="metric-row"><span>Recursos usados:</span><span id="metric-resources" class="metric-value">Básico</span></div>
+                <button id="btnSimulateDesign" style="margin-top:16px; width:100%;">⚡ Validar / Simular</button>
+            </div>
+
+            <div id="analysis" class="panel">
+                <h2>4. Análisis Final y Reflexión</h2>
+                <p style="font-size:0.9rem; color:#9fbcd9;">¿Qué aprendiste? ¿Qué cambiarías en el próximo ciclo?</p>
+                <textarea id="analisis-area" placeholder="Ejemplo: Subestimé el consumo en standby... Próximo ciclo priorizaré sensores de muy bajo consumo..."></textarea>
+                <button id="btnSaveAnalysis" style="margin-top:12px; width:100%;">💾 Guardar Reflexión</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Mentor Chat -->
+    <button id="mentor-button">🤖</button>
+    <div id="mentor-chat-window" style="display:none;">
+        <div id="chat-header">Mentor STEM Cool</div>
+        <div id="chat-messages"></div>
+        <div id="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Pregunta a tu mentor...">
+            <button id="chat-send-btn-ui">Enviar</button>
+        </div>
+    </div>
+
+    <script>// ── Variables ────────────────────────────────────────────────
+        const BASE_CONSUMPTION = 550;
+        let ideaIdCounter = 0;
+        let ideas = [];
+        let currentSavingPercent = 0;
+        let currentResources = 'Básico';
+        let simulated = false;
+
+        // ── DOM references ──────────────────────────────────────────
+        const dom = {
+            ideasList: document.getElementById('ideas-list'),
+            newIdeaInput: document.getElementById('new-idea-input'),
+            btnAddIdea: document.getElementById('btnAddIdea'),
+            btnStartCycle: document.getElementById('btnStartCycle'),
+            todoLane: document.getElementById('todo-lane'),
+            inProgressLane: document.getElementById('in-progress-lane'),
+            doneLane: document.getElementById('done-lane'),
+            designOutputArea: document.getElementById('design-output-area'),
+            btnSaveDesign: document.getElementById('btnSaveDesign'),
+            btnSimulateDesign: document.getElementById('btnSimulateDesign'),
+            metricBaseConsumption: document.getElementById('metric-base-consumption'),
+            metricSaving: document.getElementById('metric-saving'),
+            metricFinalConsumption: document.getElementById('metric-final-consumption'),
+            metricResources: document.getElementById('metric-resources'),
+            analisisArea: document.getElementById('analisis-area'),
+            btnSaveAnalysis: document.getElementById('btnSaveAnalysis'),
+            chatInput: document.getElementById('chat-input'),
+            chatMessages: document.getElementById('chat-messages')
+        };
+
+        // ── Inicialización ──────────────────────────────────────────
+        function init() {
+            // Ideas de ejemplo
+            ['Luces automáticas con sensor de movimiento', 'Apagar calefacción si ventana abierta', 'Control inteligente de electrodomésticos en standby', 'Riego automático según humedad del suelo', 'Priorización de energía solar'].forEach(t => addIdea(t));
+
+            renderIdeas();
+            updateHouseMetrics();
+            bindEvents();
+        }
+
+        // ── Funciones principales ───────────────────────────────────
+        function renderIdeas() {
+            dom.ideasList.innerHTML = '';
+            dom.todoLane.innerHTML = '<h3>Seleccionadas</h3>';
+            dom.inProgressLane.innerHTML = '<h3>En Proceso</h3>';
+            dom.doneLane.innerHTML = '<h3>Finalizado</h3>';
+
+            ideas.forEach(idea => {
+                const card = document.createElement('div');
+                card.className = `idea-card${idea.status === 'done' ? ' finalizado' : ''}`;
+                card.id = idea.id;
+                card.draggable = idea.status !== 'backlog';
+                card.innerHTML = `
+              ${idea.text}
+              <div style="font-size:0.85rem; color:#9fbcd9; margin-top:6px;">
+                Ahorro estimado: ${idea.saving}% | ${idea.resources}
+              </div>
+            `;
+
+                if (idea.status === 'backlog') {
+                    const btn = document.createElement('button');
+                    btn.textContent = 'Seleccionar →';
+                    btn.style.marginTop = '8px';
+                    btn.style.fontSize = '0.9rem';
+                    btn.onclick = () => { idea.status = 'todo'; renderIdeas(); };
+                    card.appendChild(btn);
+                    dom.ideasList.appendChild(card);
+                } else if (idea.status === 'todo') {
+                    dom.todoLane.appendChild(card);
+                } else if (idea.status === 'in-progress') {
+                    dom.inProgressLane.appendChild(card);
+                } else if (idea.status === 'done') {
+                    dom.doneLane.appendChild(card);
+                }
+
+                if (card.draggable) {
+                    card.ondragstart = e => e.dataTransfer.setData('text/plain', idea.id);
+                }
+            });
+        }
+
+        function addIdea(text = dom.newIdeaInput.value.trim()) {
+            if (!text) return;
+            ideas.push({
+                id: 'I-' + (++ideaIdCounter),
+                text,
+                status: 'backlog',
+                saving: Math.floor(Math.random() * 15) + 5,
+                resources: ['Básico', 'Intermedio', 'Avanzado'][Math.floor(Math.random() * 3)]
+            });
+            dom.newIdeaInput.value = '';
+            renderIdeas();
+        }
+
+        function updateHouseMetrics() {
+            const final = BASE_CONSUMPTION * (1 - currentSavingPercent / 100);
+            dom.metricBaseConsumption.textContent = BASE_CONSUMPTION + ' kWh';
+            dom.metricSaving.textContent = currentSavingPercent.toFixed(1) + '%';
+            dom.metricFinalConsumption.textContent = final.toFixed(1) + ' kWh';
+            dom.metricResources.textContent = currentResources;
+
+            const color = simulated && currentSavingPercent >= 30 ? 'var(--good)' : 'var(--danger)';
+            dom.metricSaving.style.color = dom.metricFinalConsumption.style.color = color;
+        }
+
+        function updateMetricsFromCycle() {
+            const done = ideas.filter(i => i.status === 'done');
+            currentSavingPercent = Math.min(70, done.reduce((s, i) => s + i.saving, 0));
+            currentResources = done.length > 2 ? 'Avanzado' : done.length ? 'Intermedio' : 'Básico';
+            simulated = true;
+            updateHouseMetrics();
+        }
+
+        // ── Eventos ─────────────────────────────────────────────────
+        function bindEvents() {
+            dom.btnAddIdea.onclick = () => addIdea();
+            dom.btnStartCycle.onclick = () => {
+                if (!ideas.some(i => i.status !== 'backlog')) return alert('Selecciona al menos una idea primero');
+                alert('Ciclo iniciado → arrastra las ideas para avanzar');
+            };
+            dom.btnSaveDesign.onclick = () => saveText('design-output-area', 'Esquematizacion');
+            dom.btnSaveAnalysis.onclick = () => saveText('analisis-area', 'Analisis_Final');
+            dom.btnSimulateDesign.onclick = () => {
+                if (!ideas.some(i => i.status === 'done')) return alert('Finaliza al menos una idea primero');
+                updateMetricsFromCycle();
+                alert(currentSavingPercent >= 30
+                    ? '¡Objetivo logrado! ≥ 30% de ahorro ✓'
+                    : 'Aún no llegas al 30%. Optimiza en el próximo ciclo.');
+            };
+
+            // Drag & Drop
+            [dom.todoLane, dom.inProgressLane, dom.doneLane].forEach(lane => {
+                lane.ondragover = e => e.preventDefault();
+                lane.ondrop = e => {
+                    e.preventDefault();
+                    const id = e.dataTransfer.getData('text/plain');
+                    const idea = ideas.find(i => i.id === id);
+                    if (idea) {
+                        idea.status = lane.id.replace('-lane', '');
+                        renderIdeas();
+                        if (idea.status === 'done') updateMetricsFromCycle();
+                    }
+                };
+            });
+        }
+
+        function saveText(id, name) {
+            const text = document.getElementById(id).value.trim();
+            if (!text) return alert('Escribe algo primero');
+            const blob = new Blob([text], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${name}_${new Date().toISOString().slice(0, 10)}.txt`;
+            a.click();
+        }
+
+        // ── Chat Mentor (corregido) ─────────────────────────────────
+        function toggleChat() {
+            const win = document.getElementById('mentor-chat-window');
+            win.style.display = win.style.display === 'none' ? 'flex' : 'none';
+            if (win.style.display === 'flex' && !dom.chatMessages.children.length) {
+                appendMessage('gemini', '👋 ¡Hola! Soy tu Mentor STEM Cool.\n¿En qué fase estás trabajando ahora?');
+            }
+        }
+
+        async function sendMessage() {
+            const text = dom.chatInput.value.trim();
+            if (!text) return;
+            appendMessage('user', text);
+            dom.chatInput.value = '';
+
+            const loading = appendMessage('gemini', '⚙️ Pensando...');
+            dom.chatInput.disabled = true;
+
+            try {
+                // CAMBIA ESTA CLAVE POR LA TUYA → https://aistudio.google.com/app/apikey
+                const API_KEY = 'AIzaSyBatnEUgvVX0UleWvoAxIocfIbLl73qyTk';
+
+                const res = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ role: "user", parts: [{ text: SYSTEM_INSTRUCTION_HOUSE + "\n\nConsulta: " + text }] }],
+                            generationConfig: { temperature: 0.7, maxOutputTokens: 300 }
+                        })
+                    }
+                );
+
+                const data = await res.json();
+                let reply = 'No se pudo obtener respuesta';
+
+                if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    reply = data.candidates[0].content.parts[0].text;
+                } else if (data.error) {
+                    reply = `Error: ${data.error.message}`;
+                }
+
+                loading.remove();
+                appendMessage('gemini', reply);
+
+            } catch (err) {
+                loading.remove();
+                appendMessage('gemini', `⚠️ Error de conexión\n${err.message}`);
+            } finally {
+                dom.chatInput.disabled = false;
+                dom.chatInput.focus();
+            }
+        }
+
+        function appendMessage(sender, text) {
+            const div = document.createElement('div');
+            div.className = `chat-message ${sender}-message`;
+            div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            dom.chatMessages.appendChild(div);
+            dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+            return div;
+        }
+
+        const SYSTEM_INSTRUCTION_HOUSE = `Eres el "Mentor STEM Cool"...`; // ← pega aquí tu prompt completo si lo deseas
+
+        document.getElementById('mentor-button').onclick = toggleChat;
+        document.getElementById('chat-send-btn-ui').onclick = sendMessage;
+        dom.chatInput.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
+
+        // Inicio
+        init();</script>
+</body>
+</html>

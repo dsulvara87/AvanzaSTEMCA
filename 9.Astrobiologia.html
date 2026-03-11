@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Misión Astrobiológica</title>
+    <style>
+        :root {
+            --bg: #05070a;
+            --panel: #0d1117;
+            --accent: #ffb703;
+            --success: #238636;
+            --text: #c9d1d9;
+            --border: #30363d;
+            --cyan: #58a6ff;
+            --danger: #f85149;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wise-nav {
+            display: flex;
+            background: var(--panel);
+            padding: 10px 20px 0;
+            gap: 5px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .step-btn {
+            padding: 12px 25px;
+            border: 1px solid var(--border);
+            border-bottom: none;
+            background: #010409;
+            color: #8b949e;
+            cursor: pointer;
+            border-radius: 6px 6px 0 0;
+            font-size: 11px;
+            text-transform: uppercase;
+            opacity: 0.5;
+            pointer-events: none;
+            transition: 0.3s;
+        }
+
+            .step-btn.unlocked {
+                opacity: 1;
+                pointer-events: auto;
+                cursor: pointer;
+            }
+
+            .step-btn.active {
+                background: var(--bg);
+                color: var(--accent);
+                border-top: 2px solid var(--accent);
+                font-weight: bold;
+                opacity: 1;
+            }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 320px auto;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        aside {
+            background: var(--panel);
+            padding: 25px;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+        }
+
+        main {
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .level-screen {
+            position: absolute;
+            inset: 0;
+            background: var(--bg);
+            z-index: 10;
+            padding: 40px;
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+            .level-screen.active {
+                display: flex;
+                z-index: 100;
+            }
+
+        #rover-viewport {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: #1a0a05;
+            overflow: hidden;
+            flex: 1;
+            min-height: 400px;
+        }
+
+        #roverCanvas, #miniMap {
+            display: block;
+        }
+
+        .reading-section {
+            background: rgba(88, 166, 255, 0.05);
+            padding: 20px;
+            border-left: 4px solid var(--cyan);
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        #challenge-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .analysis-box {
+            background: var(--panel);
+            width: 85%;
+            max-width: 650px;
+            padding: 30px;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(255,183,3,0.2);
+        }
+
+        textarea {
+            width: 100%;
+            background: #000;
+            color: #fff;
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: inherit;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        .mentor-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: none;
+        }
+
+        .mentor-box {
+            background: rgba(22, 27, 34, 0.95);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            width: 340px;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 15px;
+            color: white;
+        }
+
+        .mentor-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #log-terminal {
+            font-family: 'Consolas', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            background: #000;
+            padding: 15px;
+            height: 320px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        #labConsole {
+            background: #000;
+            border: 1px solid #30363d;
+            padding: 12px;
+            height: 160px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="wise-nav">
+        <button class="step-btn active unlocked" id="b1" onclick="showLevel(1)">01. Indagación</button>
+        <button class="step-btn" id="b2" onclick="showLevel(2)">02. Recolección y Análisis</button>
+        <button class="step-btn" id="b3" onclick="showLevel(3)">03. Laboratorio Central</button>
+        <button class="step-btn" id="b4" onclick="showLevel(4)">04. Evaluación</button>
+    </nav>
+
+    <div class="workspace">
+        <aside>
+            <h2 style="font-size: 1rem; color: var(--accent);">CENTRO DE CONTROL</h2>
+            <div id="status-info" style="font-size: 12px; line-height: 2;">
+                <b>FASE:</b> <span id="v-status">Acreditación</span><br>
+                <b>BIOFIRMAS:</b> <span id="v-prog">0/10</span> validadas.<br>
+            </div>
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+            <div id="log-terminal">
+                > Sistema AvanzaSTEM cargando...<br>
+                > Rover esperando despliegue.
+            </div>
+            <button class="btn-primary" onclick="openMentorManual()" style="margin-top: 15px;">
+                Consultar Mentor Metacognitivo
+            </button>
+        </aside>
+
+        <main>
+            <!-- Nivel 1 -->
+            <div id="level-1" class="level-screen active">
+                <h1>FASE 01: INDAGACIÓN</h1>
+                <div class="reading-section">
+                    <strong>OBSERVACIÓN:</strong> Visita la ISS para entender los protocolos de investigación extrema.
+                    <br><a href="https://www.google.com/maps/@29.560285,-95.0853914,3a,75y,211.59h,88.13t/data=!3m7!1e1!3m5!1szChUAn6SSTu_S_S7zChUAn6SSTu_S_S7!2e0!3e2!7i13312!8i6656" target="_blank" style="color:var(--cyan);">🚀 Acceso Estación Espacial Internacional</a>
+                </div>
+
+                <div style="text-align:center; font-size:12px; opacity:0.7; margin:15px 0;">
+                    Ciclo de indagación científica
+                </div>
+
+                <div class="video-box" style="max-width:1200px; margin:40px auto;">
+
+                    <div style="position:relative; width:100%; aspect-ratio:16/9; border-radius:20px; border:3px solid var(--border); overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.6);">
+
+                        <iframe src="https://www.youtube.com/embed/3G8yJaudGC0"
+                                title="YouTube video player"
+                                style="width:100%; height:100%; border:0;"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen>
+                        </iframe>
+
+                    </div>
+
+                </div>
+
+                <div class="reading-section" style="margin-top:20px;">
+                    <strong>Fase de planeación :</strong> Planeación Metacognitiva
+                    <textarea id="reflexion-1" rows="3" placeholder="¿Qué criterios científicos (biofirmas) me permitirán diferenciar una roca inanimada de una que contenga evidencia de vida?
+¿Cuáles son los riesgos ambientales en Marte (radiación, percloratos) que podrían degradar las muestras antes de recolectarlas?
+¿Cómo organizaré el recorrido para optimizar la batería y visitar los 10 puntos de recolección sin perderme en el mapa?
+Si solo pudiera usar dos herramientas de laboratorio inicialmente, ¿cuáles elegiría para descartar " falsos positivos"?
+                              ¿Estoy buscando solamente vida basada en carbono porque es la única que conozco en la Tierra?
+                              "></textarea>
+                    <button class="btn-primary" onclick="startMision()">INICIAR RECOLECCIÓN EN CAMPO</button>
+                </div>
+            </div>
+
+            <!-- Nivel 2 - Rover -->
+            <div id="level-2" class="level-screen">
+                <div id="rover-viewport">
+                    <canvas id="roverCanvas"></canvas>
+                    <canvas id="miniMap" width="200" height="200" style="position:absolute; bottom:20px; right:20px; background:#000; border:2px solid #ffb703;"></canvas>
+                </div>
+            </div>
+
+            <!-- Nivel 3 - Laboratorio (panel científico corregido) -->
+            <div id="level-3" class="level-screen">
+                <h1>LABORATORIO DE ASTROBIOLOGÍA PLANETARIA</h1>
+                <div class="reading-section">
+                    Las muestras recolectadas por el rover han sido transferidas al módulo orbital de análisis.
+                    Cada instrumento estudia una propiedad diferente para detectar biofirmas potenciales.
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:25px; margin-top:25px;">
+                    <div>
+                        <h3 style="color:#58a6ff">Instrumentos científicos</h3>
+                        <button class="btn-primary" onclick="microscopeScan()">🔬 Microscopio electrónico</button>
+                        <button class="btn-primary" onclick="runSpectrometer()">📈 Espectrómetro químico</button>
+                        <button class="btn-primary" onclick="runChromatography()">🧬 Cromatógrafo molecular</button>
+                        <button class="btn-primary" onclick="runIsotope()">⚛ Analizador isotópico</button>
+                    </div>
+
+                    <div>
+                        <h3 style="color:#ffb703">Panel científico</h3>
+                        <canvas id="labChart" style="background:#000; border:1px solid #30363d; width:100%; height:220px; display:block;"></canvas>
+                        <div id="labConsole" style="background:#000; border:1px solid #30363d; padding:12px; height:160px; overflow-y:auto; font-family:monospace; font-size:12px; margin-top:12px;">
+                            > Sistema de laboratorio listo
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top:30px">
+                    <h3 style="color:#58a6ff">Interpretación científica</h3>
+                    <textarea id="lab-conclusion" rows="5" placeholder="Analiza los resultados... ¿hay evidencia de biofirmas? "></textarea>
+                </div>
+
+                <button class="btn-primary" onclick="finishLab()" style="margin-top:20px">FINALIZAR ANÁLISIS</button>
+            </div>
+
+            <!-- Nivel 4 -->
+            <div id="level-4" class="level-screen">
+                <h1>FASE 04: EVALUACIÓN</h1>
+                <textarea id="final-report" rows="12" placeholder="Redacte su informe científico final..."></textarea>
+                <div class="reading-section" style="margin-top:20px;">
+                    <b>Informe científico</b><br><br>
+                    Incluye:<br>
+                    • Pregunta científica<br>• Metodología<br>• Resultados principales<br>• Conclusiones<br>• Limitaciones y reflexiones
+                </div>
+                <button class="btn-primary" onclick="guardarInforme()" style="margin-top:20px">EXPORTAR INVESTIGACIÓN (.TXT)</button>
+            </div>
+
+            <!-- Overlay análisis de muestra -->
+            <div id="challenge-overlay">
+                <div class="analysis-box">
+                    <h3 id="ch-title" style="margin:0; color:var(--accent);">ANÁLISIS DE MUESTRA</h3>
+                    <div id="ch-context" class="reading-section" style="margin-top:15px;"></div>
+                    <p id="ch-question" style="font-weight:bold; margin:20px 0 10px; color:var(--cyan);"></p>
+                    <textarea id="ch-input" rows="4" placeholder="Responda para validar la muestra..."></textarea>
+                    <button class="btn-primary" onclick="submitAnalysis()" style="margin-top:15px">VALIDAR Y CONTINUAR EXPLORACIÓN</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mentor metacognitivo -->
+    <div id="mentorPopup" class="mentor-popup">
+        <div class="mentor-box">
+            <div class="mentor-header">
+                Mentor metacognitivo
+                <span onclick="closeMentor()" style="cursor:pointer">✖</span>
+            </div>
+            <div id="mentorText" style="margin:12px 0; min-height:80px; white-space: pre-wrap;">
+                Bienvenido. Describe tu estrategia para analizarla juntos.
+            </div>
+            <textarea id="mentor-input" placeholder="Describe tu estrategia actual o el problema que enfrentas..." rows="4"></textarea>
+            <button class="btn-primary" onclick="sendToMentor()" style="margin-top:12px">Analizar estrategia</button>
+        </div>
+    </div>
+
+    <script>// ──────────────────────────────────────────────
+        // CONFIGURACIÓN y ESTADO GLOBAL
+        // ──────────────────────────────────────────────
+        const GEMINI_API_KEY = "AIzaSyBatnEUgvVX0UleWvoAxIocfIbLl73qyTk";
+
+        let progreso = { reflexion: "", muestras: [], informe: "" };
+        let currentLevel = 1;
+        let animationId = null;
+        let lastActivity = Date.now();
+
+        // Rover
+        const canvas = document.getElementById('roverCanvas');
+        const ctx = canvas?.getContext('2d');
+        let rover = { x: 100, y: 100, angle: 0, v: 0 };
+        let samples = [];
+        let recolectadas = 0;
+        let activeSample = null;
+        let keys = {};
+
+        // Laboratorio
+        let labState = { microscope: false, spectrometer: false, chrom: false, isotope: false };
+
+        // ──────────────────────────────────────────────
+        // FUNCIONES AUXILIARES
+        // ──────────────────────────────────────────────
+        function logTerminal(msg) {
+            const term = document.getElementById('log-terminal');
+            if (term) {
+                term.innerHTML += `> ${msg}<br>`;
+                term.scrollTop = term.scrollHeight;
+            }
+        }
+
+        function logLab(msg) {
+            const cons = document.getElementById('labConsole');
+            if (cons) {
+                cons.innerHTML += `<br>> ${msg}`;
+                cons.scrollTop = cons.scrollHeight;
+            }
+        }
+
+        function showLevel(n) {
+            currentLevel = n;
+            if (animationId) cancelAnimationFrame(animationId);
+
+            document.querySelectorAll('.level-screen').forEach(s => s.style.display = 'none');
+            const target = document.getElementById(`level-${n}`);
+            if (target) target.style.display = 'flex';
+
+            document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById(`b${n}`);
+            if (btn) btn.classList.add('active');
+
+            if (n === 2) initRover();
+            if (n === 3) resizeLabChart();
+        }
+
+        function resizeLabChart() {
+            const chart = document.getElementById("labChart");
+            if (chart) {
+                chart.width = chart.clientWidth;
+                chart.height = 220;
+            }
+        }
+
+        function saveProgress() {
+            localStorage.setItem("astrobiologia_progreso", JSON.stringify(progreso));
+        }
+
+        function showMentor(texto) {
+            const box = document.getElementById("mentorPopup");
+            const txt = document.getElementById("mentorText");
+            if (box && txt) {
+                txt.innerText = texto;
+                box.style.display = "block";
+            }
+        }
+
+        function closeMentor() {
+            const box = document.getElementById("mentorPopup");
+            if (box) {
+                box.style.display = "none";
+                const input = document.getElementById("mentor-input");
+                if (input) input.value = "";
+            }
+        }
+
+        function openMentorManual() {
+            showMentor("¿En qué parte de tu estrategia sientes que podrías mejorar?\nDescribe brevemente lo que estás haciendo ahora o el problema que enfrentas.");
+        }
+
+        // ──────────────────────────────────────────────
+        // FASE 1 - INDAGACIÓN
+        // ──────────────────────────────────────────────
+        function startMision() {
+            const reflexionEl = document.getElementById("reflexion-1");
+            if (!reflexionEl) {
+                logTerminal("ERROR: No se encontró el campo de reflexión.");
+                return;
+            }
+
+            const reflexion = reflexionEl.value.trim();
+            if (reflexion.length < 40) {
+                logTerminal(`Reflexión demasiado corta (${reflexion.length} caracteres). Mínimo requerido: 40.`);
+                return;
+            }
+
+            progreso.reflexion = reflexion;
+            saveProgress();
+
+            const btn2 = document.getElementById('b2');
+            if (btn2) {
+                btn2.classList.add('unlocked');
+                logTerminal("Nivel 2 desbloqueado → puedes pasar a Recolección y Análisis");
+            } else {
+                logTerminal("ERROR: No se encontró el botón del nivel 2 (#b2)");
+            }
+
+            showLevel(2);
+            logTerminal("Misión iniciada. Rover desplegado en Marte.");
+        }
+
+        // ──────────────────────────────────────────────
+        // FASE 2 - ROVER
+        // ──────────────────────────────────────────────
+        const ANALISIS_DATA = [
+            { id: 0, q: "¿Qué indica la presencia de silicatos hidratados?", c: "Sensor detecta minerales formados en agua líquida." },
+            { id: 1, q: "¿Por qué es importante el Carbono-12 en esta muestra?", c: "Isótopos ligeros detectados en la roca." },
+            { id: 2, q: "¿Cómo afectaría la radiación UV a este aminoácido?", c: "Proteína compleja expuesta en la superficie." },
+            { id: 3, q: "¿Es esta estructura un cristal o un posible fósil?", c: "Microscopía muestra filamentos de 50 nm." },
+            { id: 4, q: "¿Qué sugiere la liberación de metano al calentar?", c: "Análisis térmico muestra gases atrapados." },
+            { id: 5, q: "¿Podría el perclorato destruir posibles formas de vida?", c: "Alta concentración de sales oxidantes." },
+            { id: 6, q: "¿Cómo influye el pH neutro de esta arcilla?", c: "Sedimentos indican entorno acuático antiguo." },
+            { id: 7, q: "¿Qué biofirma química buscarías en la atmósfera?", c: "Detección de desequilibrio químico atmosférico." },
+            { id: 8, q: "¿Por qué la quiralidad es una clave importante?", c: "Se encuentran isómeros de una sola orientación." },
+            { id: 9, q: "¿Cuál es el riesgo de contaminación terrestre aquí?", c: "Muestra recolectada cerca del escudo térmico." }
+        ];
+
+        function initRover() {
+            if (!canvas) return;
+            resizeCanvas();
+
+            rover.x = canvas.width / 2;
+            rover.y = canvas.height / 2;
+
+            if (samples.length === 0) {
+                for (let i = 0; i < 10; i++) {
+                    samples.push({
+                        x: Math.random() * (canvas.width - 100) + 50,
+                        y: Math.random() * (canvas.height - 100) + 50,
+                        id: i,
+                        data: ANALISIS_DATA[i]
+                    });
+                }
+            }
+
+            window.addEventListener('keydown', e => keys[e.key] = true);
+            window.addEventListener('keyup', e => keys[e.key] = false);
+
+            gameLoop();
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const cont = document.getElementById('rover-viewport');
+            if (cont) {
+                canvas.width = cont.clientWidth;
+                canvas.height = cont.clientHeight;
+            }
+        }
+
+        window.addEventListener("resize", resizeCanvas);
+
+        function gameLoop() {
+            if (currentLevel !== 2 || !ctx) return;
+
+            if (!activeSample) {
+                if (keys['ArrowUp'] || keys['w']) rover.v = 3;
+                else if (keys['ArrowDown'] || keys['s']) rover.v = -2;
+                else rover.v *= 0.88;
+
+                if (keys['ArrowLeft'] || keys['a']) rover.angle -= 0.05;
+                if (keys['ArrowRight'] || keys['d']) rover.angle += 0.05;
+
+                rover.x += Math.cos(rover.angle) * rover.v;
+                rover.y += Math.sin(rover.angle) * rover.v;
+
+                rover.x = Math.max(20, Math.min(canvas.width - 20, rover.x));
+                rover.y = Math.max(20, Math.min(canvas.height - 20, rover.y));
+
+                if (rover.v !== 0 || keys['ArrowLeft'] || keys['ArrowRight'] || keys['a'] || keys['d']) {
+                    lastActivity = Date.now();
+                }
+
+                if (Date.now() - lastActivity > 60000) {
+                    showMentor("Llevas más de un minuto sin mover el rover.\n¿Qué te está impidiendo avanzar?\n¿Hay alguna estrategia que no está funcionando?");
+                    lastActivity = Date.now() + 30000;
+                }
+            }
+
+            ctx.fillStyle = "#1a0a05";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            samples.forEach(s => {
+                ctx.fillStyle = "#ffb703";
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (!activeSample && Math.hypot(rover.x - s.x, rover.y - s.y) < 30) {
+                    triggerAnalysis(s);
+                }
+            });
+
+            ctx.save();
+            ctx.translate(rover.x, rover.y);
+            ctx.rotate(rover.angle);
+            ctx.fillStyle = "#ffcc00";
+            ctx.fillRect(-20, -15, 40, 30);
+            ctx.fillStyle = "#333";
+            ctx.fillRect(-22, -18, 10, 5);
+            ctx.fillRect(12, -18, 10, 5);
+            ctx.restore();
+
+            drawMiniMap();
+
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        function drawMiniMap() {
+            const mini = document.getElementById("miniMap");
+            const mctx = mini?.getContext("2d");
+            if (!mctx) return;
+
+            mctx.clearRect(0, 0, 200, 200);
+            const sx = 200 / canvas.width;
+            const sy = 200 / canvas.height;
+
+            samples.forEach(s => {
+                mctx.fillStyle = "#ffb703";
+                mctx.beginPath();
+                mctx.arc(s.x * sx, s.y * sy, 4, 0, Math.PI * 2);
+                mctx.fill();
+            });
+
+            mctx.fillStyle = "#58a6ff";
+            mctx.beginPath();
+            mctx.arc(rover.x * sx, rover.y * sy, 6, 0, Math.PI * 2);
+            mctx.fill();
+        }
+
+        function triggerAnalysis(sample) {
+            activeSample = sample;
+            rover.v = 0;
+            document.getElementById('challenge-overlay').style.display = 'flex';
+            document.getElementById('ch-context').innerText = sample.data.c;
+            document.getElementById('ch-question').innerText = sample.data.q;
+        }
+
+        function submitAnalysis() {
+            const input = document.getElementById('ch-input');
+            const val = input?.value?.trim() || "";
+
+            if (val.length < 20) {
+                logTerminal("Análisis demasiado corto (" + val.length + " caracteres). Mínimo 20.");
+                showMentor("Tu respuesta no esta muy bien estructurada.\n¿Qué evidencia concreta observaste en la muestra?");
+                return;
+            }
+
+            progreso.muestras.push({ pregunta: activeSample.data.q, respuesta: val });
+            saveProgress();
+
+            samples = samples.filter(s => s.id !== activeSample.id);
+            recolectadas++;
+
+            document.getElementById('v-prog').innerText = `${recolectadas}/10`;
+
+            document.getElementById('challenge-overlay').style.display = 'none';
+            input.value = "";
+            activeSample = null;
+
+            logTerminal(`Muestra analizada. Total: ${recolectadas}/10`);
+
+            if (recolectadas >= 10 && samples.length === 0) {
+                logTerminal("¡Todas las muestras recolectadas y analizadas!");
+                document.getElementById("b3")?.classList.add("unlocked");
+                setTimeout(() => showLevel(3), 1500);
+            }
+        }
+
+        // ──────────────────────────────────────────────
+        // FASE 3 - LABORATORIO (panel corregido)
+        // ──────────────────────────────────────────────
+        function microscopeScan() {
+            labState.microscope = true;
+            logLab("Microscopio electrónico activado");
+            logLab("Detectadas estructuras filamentosas");
+        }
+
+        function runSpectrometer() {
+            labState.spectrometer = true;
+            const c = document.getElementById("labChart");
+            if (!c) return;
+            const ctx = c.getContext("2d");
+
+            // Redimensionar y limpiar
+            c.width = c.clientWidth;
+            c.height = 220;
+            ctx.clearRect(0, 0, c.width, c.height);
+
+            ctx.strokeStyle = "#58a6ff";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = 0; x < c.width; x++) {
+                let y = 140 + Math.sin(x / 25) * 50 + Math.random() * 12;
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            logLab("Espectro químico generado");
+            logLab("Picos principales: C, H, O, N → posible materia orgánica");
+        }
+
+        function runChromatography() {
+            labState.chrom = true;
+            logLab("Cromatografía iniciada");
+            logLab("Separación molecular completa - aminoácidos simples detectados");
+        }
+
+        function runIsotope() {
+            labState.isotope = true;
+            logLab("Análisis isotópico ejecutado");
+            logLab("Relación C12/C13 anómala - posible fraccionamiento biológico");
+        }
+
+        function finishLab() {
+            if (!Object.values(labState).every(v => v)) {
+                showMentor("Aún no has utilizado todos los instrumentos.\n¿Por qué decidiste concluir sin recolectar todos los datos?\n¿Qué riesgo implica eso?");
+                logTerminal("Faltan instrumentos por usar. Completa todos antes de finalizar.");
+                return;
+            }
+
+            const conclusion = document.getElementById("lab-conclusion")?.value?.trim() || "";
+            if (conclusion.length < 30) {
+                showMentor("Tu interpretación es muy corta.\n¿Qué evidencia clave de los instrumentos no mencionaste?");
+                logTerminal("Interpretación demasiado corta (" + conclusion.length + " caracteres). Mínimo 30.");
+                return;
+            }
+
+            logTerminal("Laboratorio completado. Datos enviados a evaluación.");
+            document.getElementById("b4")?.classList.add("unlocked");
+            showLevel(4);
+        }
+
+        // ──────────────────────────────────────────────
+        // FASE 4 - INFORME
+        // ──────────────────────────────────────────────
+        function guardarInforme() {
+            const informe = document.getElementById("final-report")?.value?.trim() || "";
+            if (informe.length < 100) {
+                showMentor("Tu informe es bastante corto.\n¿Qué aspectos importantes de la misión podrías estar omitiendo?");
+                logTerminal("Informe demasiado corto (" + informe.length + " caracteres). Mínimo 100.");
+                return;
+            }
+
+            progreso.informe = informe;
+            saveProgress();
+
+            const texto = JSON.stringify(progreso, null, 2);
+            const blob = new Blob([texto], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `informe_astrobio_${new Date().toISOString().slice(0, 10)}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ──────────────────────────────────────────────
+        // MENTOR METACOGNITIVO
+        // ──────────────────────────────────────────────
+        async function sendToMentor() {
+            const input = document.getElementById("mentor-input");
+            if (!input || input.value.trim().length < 8) {
+                showMentor("Describe con más detalle tu estrategia o el problema que enfrentas.");
+                return;
+            }
+
+            const estrategia = input.value.trim();
+            const contexto = currentLevel === 2 ? "Exploración con rover" :
+                currentLevel === 3 ? "Análisis de laboratorio" : "Evaluación final";
+
+            const prompt = `
+Eres un mentor metacognitivo inspirado en John Flavell.
+Analiza SOLO la estrategia metacognitiva del estudiante.
+
+Contexto: ${contexto}
+Estrategia del estudiante: "${estrategia}"
+
+Retroalimentación breve (máximo 6 líneas):
+- Fortalezas claras
+- Puntos ciegos o riesgos no considerados
+- UNA sola pregunta reflexiva poderosa
+
+Responde en español, tono motivador y educativo.
+NO invites a continuar el chat.
+                `;
+
+            try {
+                const res = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AIzaSyBatnEUgvVX0UleWvoAxIocfIbLl73qyTk}`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    }
+                );
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data = await res.json();
+                const feedback = data.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudo obtener retroalimentación.";
+                showMentor(feedback);
+                input.value = "";
+
+            } catch (err) {
+                console.error("Error Gemini:", err);
+                showMentor("Error al conectar con el mentor IA. Intenta más tarde.");
+            }
+        }
+
+        // ──────────────────────────────────────────────
+        // INICIO
+        // ──────────────────────────────────────────────
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem("astrobiologia_progreso");
+            if (saved) {
+                try {
+                    progreso = JSON.parse(saved);
+                    recolectadas = progreso.muestras.length;
+                    document.getElementById('v-prog').innerText = `${recolectadas}/10`;
+                    if (recolectadas >= 10) document.getElementById("b3")?.classList.add("unlocked");
+                } catch (e) { }
+            }
+            showLevel(1);
+        });</script>
+</body>
+</html>
